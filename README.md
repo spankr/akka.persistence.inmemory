@@ -1,7 +1,7 @@
 # Akka.Persistence.InMemory
 
 This library contains in-memory persistence actors that have their underlying collections exposed for unit testing purposes.
-It is based off of the [MongoDB persistence library](https://github.com/akkadotnet/Akka.Persistence.MongoDB).
+It is based off (heavily, I might add) of the [MongoDB persistence library](https://github.com/akkadotnet/Akka.Persistence.MongoDB).
 
 **DISCLAIMER:** This project is by no means sanctioned by the Akka.NET community. I am
 using the akka.* namespace strictly in the hopes that it will be easier to merge into a
