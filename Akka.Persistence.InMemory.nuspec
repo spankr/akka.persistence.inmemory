@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Akka.Persistence.InMemory</id>
+        <version>0.0.0</version>
+        <title>Akka.Persistence.InMemory</title>
+        <authors></authors>
+        <projectUrl>https://github.com/spankr/akka.persistence.inmemory.git</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Library for an akka in-memory persistence for use while unit testing</description>
+        <dependencies>
+            <dependency id="Akka.Persistence" version="0.0.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="Akka.Persistence.InMemory\bin\Release\Akka.Persistence.InMemory.dll" target="lib\Akka.Persistence.InMemory.dll" />
+        <file src="Akka.Persistence.InMemory\bin\Release\Akka.Persistence.InMemory.pdb" target="lib\Akka.Persistence.InMemory.pdb" />
+    </files>
+</package>
