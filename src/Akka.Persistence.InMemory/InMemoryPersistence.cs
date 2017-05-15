@@ -1,7 +1,10 @@
 ﻿using Akka.Actor;
 using Akka.Configuration;
+using Akka.Persistence.InMemory.Journal;
 using Akka.Persistence.InMemory.Settings;
+using Akka.Persistence.InMemory.Snapshot;
 using System;
+using System.Collections.Generic;
 
 namespace Akka.Persistence.InMemory
 {
@@ -25,11 +28,15 @@ namespace Akka.Persistence.InMemory
         /// The settings for the InMemory journal.
         /// </summary>
         public InMemoryJournalSettings JournalSettings { get; }
+        public List<JournalEntry> JournalSource { get; private set; }
+        public List<MetadataEntry> MetadataSource { get; private set; }
 
         /// <summary>
         /// The settings for the snapshot store.
         /// </summary>
         public InMemorySnapshotSettings SnapshotStoreSettings { get; }
+        public List<SnapshotEntry> SnapshotSource { get; private set; }
+
 
         public InMemoryPersistence(ExtendedActorSystem system)
         {
@@ -42,9 +49,12 @@ namespace Akka.Persistence.InMemory
             // Read config
             var journalConfig = system.Settings.Config.GetConfig("akka.persistence.journal.inmemory");
             JournalSettings = new InMemoryJournalSettings(journalConfig);
+            JournalSource = new List<JournalEntry>();
+            MetadataSource = new List<MetadataEntry>();
 
             var snapshotConfig = system.Settings.Config.GetConfig("akka.persistence.snapshot-store.inmemory");
             SnapshotStoreSettings = new InMemorySnapshotSettings(snapshotConfig);
+            SnapshotSource = new List<SnapshotEntry>();
         }
 
     }
