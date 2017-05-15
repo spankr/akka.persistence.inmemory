@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Akka.Persistence.InMemory.Tests
 {
-    public class InMemorySnapshotStoreTests : TestKit.Xunit2.TestKit
+    public class InMemorySnapshotStoreTests : Akka.TestKit.Xunit2.TestKit
     {
         private static readonly string CONFIG = @"
             akka.persistence {
@@ -21,10 +21,7 @@ namespace Akka.Persistence.InMemory.Tests
                 }
             }";
 
-        public InMemorySnapshotStoreTests() : base(CONFIG)
-        {
-            InMemorySnapshotStore.ExternalSnapshotSource = new List<SnapshotEntry>();
-        }
+        public InMemorySnapshotStoreTests() : base(CONFIG) { }
 
         [Fact(DisplayName = "We can save state to the snapshot store")]
         public void CanSaveStateToSnapshotStore()
@@ -35,22 +32,22 @@ namespace Akka.Persistence.InMemory.Tests
             snapshotActor.Tell(new SetStateCommand(EXPECTED_STATE));
             ExpectNoMsg();
 
-            var snapshots = InMemorySnapshotStore.ExternalSnapshotSource;
+            var snapshots = InMemoryPersistence.Get(Sys).SnapshotSource;
 
             Assert.Equal(1, snapshots.Count);
             Assert.IsType(typeof(TestActorState), snapshots[0].Snapshot);
             Assert.Equal(EXPECTED_STATE, (snapshots[0].Snapshot as TestActorState).State);
         }
 
-        [Fact(DisplayName ="We can load state from the snapshot store")]
+        [Fact(DisplayName = "We can load state from the snapshot store")]
         public void CanLoadStateFromSnapshotStore()
         {
             const string ACTOR_NAME = "test-actorX";
             const string EXPECTED_STATE = "Ken Hartley Reed";
-            var snapshots = InMemorySnapshotStore.ExternalSnapshotSource;
+            var snapshots = InMemoryPersistence.Get(Sys).SnapshotSource;
             snapshots.Add(new SnapshotEntry()
             {
-                Id = ACTOR_NAME+"_0",
+                Id = ACTOR_NAME + "_0",
                 PersistenceId = ACTOR_NAME,
                 SequenceNr = 0,
                 Snapshot = new TestActorState() { State = EXPECTED_STATE },

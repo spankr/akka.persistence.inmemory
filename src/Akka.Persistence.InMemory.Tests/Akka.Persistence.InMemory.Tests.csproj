@@ -39,6 +39,9 @@
     <Reference Include="Akka.Persistence, Version=1.2.0.36, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Akka.Persistence.1.2.0.36-beta\lib\net45\Akka.Persistence.dll</HintPath>
     </Reference>
+    <Reference Include="Akka.Persistence.TestKit, Version=1.2.0.36, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Persistence.TestKit.1.2.0.36-beta\lib\net45\Akka.Persistence.TestKit.dll</HintPath>
+    </Reference>
     <Reference Include="Akka.TestKit, Version=1.2.0.33, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Akka.TestKit.1.2.0\lib\net45\Akka.TestKit.dll</HintPath>
     </Reference>
@@ -86,6 +89,7 @@
     <Compile Include="Commands\GetStateCommand.cs" />
     <Compile Include="Commands\SetStateCommand.cs" />
     <Compile Include="InMemoryJournalTests.cs" />
+    <Compile Include="InMemorySnapshotStoreSpec.cs" />
     <Compile Include="InMemorySnapshotStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

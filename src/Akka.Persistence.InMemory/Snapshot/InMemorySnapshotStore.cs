@@ -16,8 +16,6 @@ namespace Akka.Persistence.InMemory.Snapshot
 
         private List<SnapshotEntry> _snapshotCollection;
 
-        public static List<SnapshotEntry> ExternalSnapshotSource { get; set; }
-
         public InMemorySnapshotStore()
         {
             _settings = InMemoryPersistence.Get(Context.System).SnapshotStoreSettings;
@@ -27,14 +25,7 @@ namespace Akka.Persistence.InMemory.Snapshot
         {
             base.PreStart();
 
-            if (ExternalSnapshotSource != null)
-            {
-                _snapshotCollection = ExternalSnapshotSource;
-            }
-            else
-            {
-                _snapshotCollection = new List<SnapshotEntry>();
-            }
+            _snapshotCollection = InMemoryPersistence.Get(Context.System).SnapshotSource;
         }
 
         protected override Task<SelectedSnapshot> LoadAsync(string persistenceId, SnapshotSelectionCriteria criteria)
@@ -69,17 +60,9 @@ namespace Akka.Persistence.InMemory.Snapshot
 
         protected override Task DeleteAsync(SnapshotMetadata metadata)
         {
-            Func<SnapshotEntry, bool> pred = x => x.PersistenceId == metadata.PersistenceId;
-
-            if (metadata.SequenceNr > 0 && metadata.SequenceNr < long.MaxValue)
-            {
-                pred = x => pred(x) && x.SequenceNr == metadata.SequenceNr;
-            }
-
-            if (metadata.Timestamp != DateTime.MinValue && metadata.Timestamp != DateTime.MaxValue)
-            {
-                pred = x => pred(x) && x.Timestamp == metadata.Timestamp.Ticks;
-            }
+            Func<SnapshotEntry, bool> pred = x => x.PersistenceId == metadata.PersistenceId &&
+            (metadata.SequenceNr <= 0 || metadata.SequenceNr == long.MaxValue || x.SequenceNr == metadata.SequenceNr) &&
+            (metadata.Timestamp == DateTime.MinValue || metadata.Timestamp == DateTime.MaxValue || x.Timestamp == metadata.Timestamp.Ticks);
 
             return Task.Run(() =>
             {
@@ -103,19 +86,9 @@ namespace Akka.Persistence.InMemory.Snapshot
 
         private Func<SnapshotEntry, bool> CreateRangeFilter(string persistenceId, SnapshotSelectionCriteria criteria)
         {
-            Func<SnapshotEntry, bool> pred = x => x.PersistenceId == persistenceId;
-
-            if (criteria.MaxSequenceNr > 0 && criteria.MaxSequenceNr < long.MaxValue)
-            {
-                pred = x => pred(x) && x.SequenceNr <= criteria.MaxSequenceNr;
-            }
-
-            if (criteria.MaxTimeStamp != DateTime.MinValue && criteria.MaxTimeStamp != DateTime.MaxValue)
-            {
-                pred = x => pred(x) && x.Timestamp <= criteria.MaxTimeStamp.Ticks;
-            }
-
-            return pred;
+            return (x => x.PersistenceId == persistenceId &&
+            (criteria.MaxSequenceNr <= 0 || criteria.MaxSequenceNr == long.MaxValue || x.SequenceNr <= criteria.MaxSequenceNr) &&
+            (criteria.MaxTimeStamp == DateTime.MinValue || criteria.MaxTimeStamp == DateTime.MaxValue || x.Timestamp <= criteria.MaxTimeStamp.Ticks));
         }
 
         private static SnapshotEntry ToSnapshotEntry(SnapshotMetadata metadata, object snapshot)

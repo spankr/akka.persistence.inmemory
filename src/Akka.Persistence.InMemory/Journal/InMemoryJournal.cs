@@ -15,9 +15,6 @@ namespace Akka.Persistence.InMemory.Journal
         private List<JournalEntry> _journalCollection;
         private List<MetadataEntry> _metadataCollection;
 
-        public static List<JournalEntry> ExternalJournalSource { get; set; }
-        public static List<MetadataEntry> ExternalMetadataSource { get; set; }
-
         public InMemoryJournal()
         {
             _settings = InMemoryPersistence.Get(Context.System).JournalSettings;
@@ -27,23 +24,8 @@ namespace Akka.Persistence.InMemory.Journal
         {
             base.PreStart();
 
-            if (ExternalJournalSource != null)
-            {
-                _journalCollection = ExternalJournalSource;
-            }
-            else
-            {
-                _journalCollection = new List<JournalEntry>();
-            }
-
-            if (ExternalMetadataSource != null)
-            {
-                _metadataCollection = ExternalMetadataSource;
-            }
-            else
-            {
-                _metadataCollection = new List<MetadataEntry>();
-            }
+            _journalCollection = InMemoryPersistence.Get(Context.System).JournalSource;
+            _metadataCollection = InMemoryPersistence.Get(Context.System).MetadataSource;
         }
 
         public override async Task ReplayMessagesAsync(IActorContext context, string persistenceId, long fromSequenceNr, long toSequenceNr, long max, Action<IPersistentRepresentation> recoveryCallback)
