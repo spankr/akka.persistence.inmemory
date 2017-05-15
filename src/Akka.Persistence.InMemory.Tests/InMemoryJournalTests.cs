@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Akka.Persistence.InMemory.Tests
 {
-    public class InMemoryJournalTests : TestKit.Xunit2.TestKit
+    public class InMemoryJournalTests : Akka.TestKit.Xunit2.TestKit
     {
         private static readonly string CONFIG = @"
             akka.persistence {
@@ -22,11 +22,7 @@ namespace Akka.Persistence.InMemory.Tests
                 }
             }";
 
-        public InMemoryJournalTests() : base(CONFIG)
-        {
-            InMemoryJournal.ExternalJournalSource = new List<JournalEntry>();
-            InMemoryJournal.ExternalMetadataSource = new List<MetadataEntry>();
-        }
+        public InMemoryJournalTests() : base(CONFIG) { }
 
         [Fact(DisplayName = "We can save events to the journal")]
         public void CanStoreToJournal()
@@ -41,14 +37,14 @@ namespace Akka.Persistence.InMemory.Tests
             actor.Tell(new SetStateCommand(EXPECTED_STATE02));
             ExpectNoMsg();
 
-            var journal = InMemoryJournal.ExternalJournalSource;
+            var journal = InMemoryPersistence.Get(Sys).JournalSource;
             Assert.Equal(2, journal.Count);
             Assert.Equal(ACTOR_NAME, journal[0].PersistenceId);
             Assert.Equal(EXPECTED_STATE01, (journal[0].Payload as SetStateCommand).NewState);
             Assert.Equal(ACTOR_NAME, journal[1].PersistenceId);
             Assert.Equal(EXPECTED_STATE02, (journal[1].Payload as SetStateCommand).NewState);
 
-            var metadata = InMemoryJournal.ExternalMetadataSource;
+            var metadata = InMemoryPersistence.Get(Sys).MetadataSource;
             Assert.Equal(1, metadata.Count);
             Assert.Equal(2, metadata[0].SequenceNr);
             Assert.Equal(ACTOR_NAME, metadata[0].PersistenceId);
@@ -61,8 +57,8 @@ namespace Akka.Persistence.InMemory.Tests
             const string EXPECTED_STATE01 = "State01";
             const string EXPECTED_STATE02 = "State02";
 
-            var journal = InMemoryJournal.ExternalJournalSource;
-            var metadata = InMemoryJournal.ExternalMetadataSource;
+            var journal = InMemoryPersistence.Get(Sys).JournalSource;
+            var metadata = InMemoryPersistence.Get(Sys).MetadataSource;
 
             journal.Add(new JournalEntry()
             {
@@ -87,7 +83,8 @@ namespace Akka.Persistence.InMemory.Tests
                 SequenceNr = 2
             });
 
-            EventFilter.Info(message: "Recovering SetStateCommand.").Expect(2, () => {
+            EventFilter.Info(message: "Recovering SetStateCommand.").Expect(2, () =>
+            {
                 var actor = Sys.ActorOf(Props.Create(() => new PersistByJournalTestActor()), ACTOR_NAME);
                 actor.Tell(new GetStateCommand());
                 ExpectMsg<string>(msg => msg == EXPECTED_STATE02);
